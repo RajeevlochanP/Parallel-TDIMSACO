@@ -14,7 +14,7 @@ struct Position {
 
 class GraphT {
 public:
-    vector<vector<bool>> graph;
+    vector<vector<char>> graph;
     vector<vector<double>> tdiValues;
     vector<vector<Position>> index_data;
     int size;
@@ -26,7 +26,7 @@ public:
     }
 
     void generateGraphT(int size) {
-        this->graph = vector<vector<bool>>(size, vector<bool>(size, false));
+        this->graph = vector<vector<char>>(size, vector<char>(size, 0));
         this->tdiValues = vector<vector<double>>(size, vector<double>(size, 0.0));
         this->index_data = vector<vector<Position>>(size, vector<Position>(size, Position(-1, -1)));
         this->size = size;
@@ -49,21 +49,23 @@ public:
             int r = pr.first;
             int c = pr.second;
             if (r >= 0 && r < size && c >= 0 && c < size) {
-                this->graph[r][c] = true;
+                this->graph[r][c] = 1;
             }
         }
     }
 
     void restartTdiValues() {
         double initialTdiValue = 10 * GraphT::distance(Position(0,0), Position((int)tdiValues.size()-1, (int)tdiValues[0].size()-1));
+        //highly parallelizable
         for (size_t i = 0; i < tdiValues.size(); ++i) {
             for (size_t j = 0; j < tdiValues[0].size(); ++j) {
                 tdiValues[i][j] = initialTdiValue;
                 index_data[i][j] = Position(-1, -1);
             }
         }
-        if (!tdiValues.empty())
+        if (!tdiValues.empty()){
             tdiValues[size-1][size-1] = 0;
+        }
     }
 
     static double distance(const Position& p1, const Position& p2) {
@@ -72,6 +74,7 @@ public:
         return sqrt(dr*dr + dc*dc);
     }
 
+    //this is not parllelizable as it contains too much interaction with shared memory but can be runned with multiple ants at a time
     void updateTdiValues(const vector<Position>& path) {
         if (path.size() < 2) return;
         for (int idx = (int)path.size() - 2; idx > -1; --idx) {
@@ -130,7 +133,7 @@ public:
         if (steps <= 0) steps = 1;
         double xinc = dx / (double)steps;
         double yinc = dy / (double)steps;
-
+        //parllelizable just checking at all i1,j1 doing it from k=0 to steps
         for (int k = 0; k < steps; ++k) {
             i1 += xinc;
             j1 += yinc;
@@ -150,7 +153,7 @@ public:
             }
 
             if (i >= 0 && i < (int)grid->graph.size() && j >= 0 && j < (int)grid->graph[0].size()) {
-                if (grid->graph[i][j]) {
+                if (grid->graph[i][j]==1) {
                     return false;
                 }
             } else {
@@ -247,21 +250,24 @@ int main() {
     ants.reserve(noOfAnts);
     Position goalPosition(grid.size - 1, grid.size - 1);
 
+    //ants creation and pushing into vectors i think with reduction i can do this in O(log(ants count))
     for (int i = 0; i < noOfAnts; ++i) {
         ants.emplace_back(make_unique<AntT>(&grid, stepSize, alpha, beta));
     }
 
     for (int iter = 0; iter < noOfIterations; ++iter) {
+        //completely independent so parllelize not even shared memory zero communication needed but after completion barrier is needed
         for (int j = 0; j < noOfAnts; ++j) {
             ants[j]->findSolution();
         }
+        //must not parllelize as it contains too much interaction with shared memory
         for (int j = 0; j < noOfAnts; ++j) {
             grid.updateTdiValues(ants[j]->path);
         }
         for (int j = 0; j < noOfAnts; ++j) {
             ants[j]->restartPath();
         }
-        cout << iter << ", ";
+        cout << iter << ", "<< std::flush;
 
         solutions.push_back(vector<Position>());
         solutions.back().push_back(Position(0, 0));
