@@ -1,1 +1,1 @@
-./
+g++ -std=c++17 -O2 -fopenmp mainOpenMP.cpp -o main
