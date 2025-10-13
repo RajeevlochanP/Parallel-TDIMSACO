@@ -30,32 +30,10 @@ public:
     }
 
     void generateGraphT(int size,vector<vector<char>> graph) {
-        this->graph = vector<vector<char>>(size, vector<char>(size, 0));
+        this->graph = graph;
         this->tdiValues = vector<vector<double>>(size, vector<double>(size, 0.0));
         this->index_data = vector<vector<Position>>(size, vector<Position>(size, Position(-1, -1)));
         this->size = size;
-
-        vector<pair<int,int>> trueIndices = {
-            { 1, 4 }, { 1, 5 }, { 2, 4 }, { 2, 4 }, { 2, 5 }, { 3, 4 }, { 3, 5 }, { 1, 11 }, { 2, 11 }, { 3, 11 },
-            { 1, 13 }, { 1, 14 }, { 2, 13 }, { 2, 14 }, { 3, 13 }, { 3, 14 }, { 2, 17 }, { 2, 18 }, { 6, 3 },
-            { 6, 4 }, { 7, 3 }, { 7, 4 }, { 8, 3 }, { 8, 4 }, { 6, 8 }, { 6, 9 }, { 7, 8 }, { 7, 9 }, { 8, 8 },
-            { 8, 9 }, { 6, 15 }, { 6, 16 }, { 6, 17 }, { 7, 15 }, { 7, 16 }, { 7, 17 }, { 8, 15 }, { 8, 16 },
-            { 8, 17 }, { 10, 3 }, { 10, 4 }, { 10, 5 }, { 10, 9 }, { 11, 7 }, { 11, 8 }, { 11, 9 }, { 11, 10 },
-            { 11, 11 }, { 11, 12 }, { 11, 13 }, { 12, 7 }, { 12, 8 }, { 12, 9 }, { 12, 10 }, { 12, 11 }, { 12, 12 },
-            { 12, 13 }, { 13, 7 }, { 13, 8 }, { 13, 9 }, { 13, 10 }, { 13, 11 }, { 13, 12 }, { 13, 13 }, { 12, 5 },
-            { 13, 5 }, { 14, 5 }, { 15, 5 }, { 16, 5 }, { 14, 2 }, { 14, 3 }, { 15, 2 }, { 15, 3 }, { 17, 2 },
-            { 17, 3 }, { 18, 2 }, { 18, 3 }, { 15, 7 }, { 16, 7 }, { 17, 7 }, { 18, 7 }, { 15, 12 }, { 15, 13 },
-            { 15, 14 }, { 16, 12 }, { 16, 13 }, { 16, 14 }, { 17, 12 }, { 17, 13 }, { 17, 14 }, { 18, 12 },
-            { 18, 13 }, { 18, 14 }, { 17, 16 }, { 17, 17 }, { 18, 16 }, { 18, 17 }
-        };
-
-        for (auto &pr : trueIndices) {
-            int r = pr.first;
-            int c = pr.second;
-            if (r >= 0 && r < size && c >= 0 && c < size) {
-                this->graph[r][c] = 1;
-            }
-        }
     }
 
     void restartTdiValues() {
@@ -184,7 +162,7 @@ public:
             }
         }
         if (allowed.empty()) {
-            cerr << "No solution for this graph" << endl;
+            cout << "No solution for this graph" << endl;
             return Position(-1, -1);
         }
 
@@ -225,7 +203,7 @@ public:
         for (size_t i = 0; !(this->path[i] == goalPosition); ++i) {
             Position nxt = nextPosition(this->path[i]);
             if (nxt.row == -1 && nxt.col == -1) {
-                cerr << "nextPosition failed (no allowed). Aborting findSolution for this ant." << endl;
+                cout << "nextPosition failed (no allowed). Aborting findSolution for this ant." << endl;
                 return;
             }
             this->path.push_back(nxt);
@@ -240,20 +218,80 @@ public:
     }
 };
 
+vector<vector<char>> readGridFromFile(const string& filePath, int gridIndex) {
+    vector<vector<char>> grid;
+    ifstream inputFile(filePath);
+    if (!inputFile.is_open()) {
+        cerr << "Error: Could not open file at path: " << filePath << endl;
+        return grid;
+    }
+
+    string line;
+    bool gridFound = false;
+
+    while (getline(inputFile, line)) {
+        if (line.rfind("GRID ", 0) == 0) {
+            string gridKeyword;
+            int currentIndex, n = 0;
+            double p = 0.0;
+            long long seed = 0;
+
+            stringstream ss(line);
+            ss >> gridKeyword >> currentIndex;
+
+            string token;
+            while (ss >> token) {
+                if (token.rfind("n=", 0) == 0) n = stoi(token.substr(2));
+                else if (token.rfind("p=", 0) == 0) p = stod(token.substr(2));
+                else if (token.rfind("seed=", 0) == 0) seed = stoll(token.substr(5));
+            }
+
+            if (currentIndex == gridIndex) {
+                gridFound = true;
+                grid.assign(n, vector<char>());
+
+                for (int i = 0; i < n; ++i) {
+                    if (!getline(inputFile, line)) {
+                        cerr << "Error: Unexpected EOF while reading GRID " << gridIndex << endl;
+                        return {};
+                    }
+                    stringstream row(line);
+                    char cell;
+                    while (row >> cell)
+                        grid[i].push_back(cell);
+                }
+
+                // done reading desired grid
+                cout << "Read GRID " << gridIndex
+                     << " successfully: n=" << n
+                     << " p=" << p
+                     << " seed=" << seed << endl;
+                break;
+            }
+        }
+    }
+
+    if (!gridFound)
+        cerr << "Error: GRID " << gridIndex << " not found in " << filePath << endl;
+
+    return grid;
+}
+
 mt19937 AntT::rng((unsigned)chrono::high_resolution_clock::now().time_since_epoch().count());
 
 int main(int argc, char** argv) {
     if (argc < 3) {
-        cerr << "Usage: " << argv[0] << " <path to grids.txt> <grid_index>\n";
+        cout << "Usage: " << argv[0] << " <path to grids.txt> <grid_index>\n" << std::flush;
         return 1;
     }
     // taking required inputs
-    // int gridSize=
+    char* filePath = argv[1];
+    int gridIndex = atoi(argv[2]);
+    // getting grid from file
+    vector<vector<char>> test=readGridFromFile(filePath,gridIndex);
 
 
-
-
-    GraphT grid(20);
+    GraphT grid((int)test.size(),test);
     vector<Position> solution;
     double solutionCost = 0.0;
     vector<vector<Position>> solutions;
