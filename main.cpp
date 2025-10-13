@@ -10,6 +10,10 @@ struct Position {
     string toString() const {
         return "(" + to_string(row) + "," + to_string(col) + ")";
     }
+    friend ostream& operator<<(ostream& os, const Position& p) {
+        os << p.toString();
+        return os;
+    }
 };
 
 class GraphT {
@@ -19,13 +23,13 @@ public:
     vector<vector<Position>> index_data;
     int size;
 
-    GraphT(int size) {
-        generateGraphT(size);
+    GraphT(int size,vector<vector<char>> graph) {
+        generateGraphT(size,graph);
         restartTdiValues();
         this->size = size;
     }
 
-    void generateGraphT(int size) {
+    void generateGraphT(int size,vector<vector<char>> graph) {
         this->graph = vector<vector<char>>(size, vector<char>(size, 0));
         this->tdiValues = vector<vector<double>>(size, vector<double>(size, 0.0));
         this->index_data = vector<vector<Position>>(size, vector<Position>(size, Position(-1, -1)));
@@ -238,7 +242,17 @@ public:
 
 mt19937 AntT::rng((unsigned)chrono::high_resolution_clock::now().time_since_epoch().count());
 
-int main() {
+int main(int argc, char** argv) {
+    if (argc < 3) {
+        cerr << "Usage: " << argv[0] << " <path to grids.txt> <grid_index>\n";
+        return 1;
+    }
+    // taking required inputs
+    // int gridSize=
+
+
+
+
     GraphT grid(20);
     vector<Position> solution;
     double solutionCost = 0.0;
@@ -267,7 +281,7 @@ int main() {
         for (int j = 0; j < noOfAnts; ++j) {
             ants[j]->restartPath();
         }
-        cout << iter << ", "<< std::flush;
+        // cout << iter << ", "<< std::flush;
 
         solutions.push_back(vector<Position>());
         solutions.back().push_back(Position(0, 0));
@@ -292,10 +306,13 @@ int main() {
         solution.push_back(next);
         if (next.row == -1 && next.col == -1) break;
     }
+    cout << "Solution : " << solution[0]<< std::flush;
     for (size_t j = 1; j < solution.size(); ++j) {
+        cout << "," << solution[j]<< std::flush;
         solutionCost += GraphT::distance(solution[j-1], solution[j]);
     }
 
-    cout << "\nTdi value of (0,0) :" << grid.tdiValues[0][0] << endl;
+    cout << "\nSolutionCost : " << solutionCost << endl;
+
     return 0;
 }

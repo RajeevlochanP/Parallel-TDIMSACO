@@ -310,7 +310,7 @@ int main() {
             }
         }
 
-        // Merge results
+        //merge results
         grid.merge(localGrids);
         for (int j = 0; j < noOfAnts; ++j) {
             ants[j]->restartPath();
