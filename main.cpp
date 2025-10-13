@@ -93,6 +93,7 @@ public:
     }
 
     bool isAllowed(const Position& p1, const Position& p2) {
+        // cout << p1 << "  " << p2 << endl;
         double i1 = p1.row + 0.5;
         double j1 = p1.col + 0.5;
         double i2 = p2.row + 0.5;
@@ -103,9 +104,13 @@ public:
             j1 >= (double)grid->graph[0].size() || j2 >= (double)grid->graph[0].size()) {
             return false;
         }
-
-        if (grid->graph[(int)floor(i1)][(int)floor(j1)] ||
-            grid->graph[(int)floor(i2)][(int)floor(j2)]) {
+        // if(p2.row==1 && p2.col==0){
+        //     cout<< grid->graph[(int)floor(i2)][(int)floor(j2)] << " , " << grid->graph[(int)floor(i2)][(int)floor(j2)];
+        // }
+        if ((grid->graph[(int)floor(i1)][(int)floor(j1)]==1) || (grid->graph[(int)floor(i2)][(int)floor(j2)]==1)) {
+            // if(p2.row==1 && p2.col==0){
+            //     cout<< " hii ";
+            // }
             return false;
         }
 
@@ -295,7 +300,7 @@ int main(int argc, char** argv) {
     vector<Position> solution;
     double solutionCost = 0.0;
     vector<vector<Position>> solutions;
-    int noOfAnts = 10, noOfIterations = 10, stepSize = 3;
+    int noOfAnts = 10, noOfIterations = 20, stepSize = 3;
     double alpha = 1.5, beta = 0.8;
     vector<double> solutionsCost(noOfIterations);
     vector<unique_ptr<AntT>> ants;
@@ -319,7 +324,7 @@ int main(int argc, char** argv) {
         for (int j = 0; j < noOfAnts; ++j) {
             ants[j]->restartPath();
         }
-        // cout << iter << ", "<< std::flush;
+        cout << iter << ", "<< std::flush;
 
         solutions.push_back(vector<Position>());
         solutions.back().push_back(Position(0, 0));
