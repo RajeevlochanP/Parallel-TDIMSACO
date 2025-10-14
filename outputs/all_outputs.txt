@@ -1,0 +1,308 @@
+===== Run #0 =====
+Read GRID 0 successfully: n=1 p=0.13 seed=971824975334294892
+Solution : (0,0)
+SolutionCost : 0
+
+
+===== Run #1 =====
+Read GRID 1 successfully: n=1 p=0.12 seed=971824975334294893
+Solution : (0,0)
+SolutionCost : 0
+
+
+===== Run #2 =====
+Read GRID 2 successfully: n=1 p=0.43 seed=971824975334294894
+Solution : (0,0)
+SolutionCost : 0
+
+
+===== Run #3 =====
+Read GRID 3 successfully: n=1 p=0.08 seed=971824975334294895
+Solution : (0,0)
+SolutionCost : 0
+
+
+===== Run #4 =====
+Read GRID 4 successfully: n=2 p=0.1 seed=971824975334294896
+Solution : (0,0),(1,1)
+SolutionCost : 1.41421
+
+
+===== Run #5 =====
+Read GRID 5 successfully: n=2 p=0.21 seed=971824975334294897
+Solution : (0,0),(1,1)
+SolutionCost : 1.41421
+
+
+===== Run #6 =====
+Read GRID 6 successfully: n=2 p=0.26 seed=971824975334294898
+Solution : (0,0),(1,1)
+SolutionCost : 1.41421
+
+
+===== Run #7 =====
+Read GRID 7 successfully: n=2 p=0.39 seed=971824975334294899
+Solution : (0,0),(1,1)
+SolutionCost : 1.41421
+
+
+===== Run #8 =====
+Read GRID 8 successfully: n=3 p=0.06 seed=971824975334294900
+Solution : (0,0),(2,2)
+SolutionCost : 2.82843
+
+
+===== Run #9 =====
+Read GRID 9 successfully: n=4 p=0.09 seed=971824975334294901
+Solution : (0,0),(3,3)
+SolutionCost : 4.24264
+
+
+===== Run #10 =====
+Read GRID 10 successfully: n=4 p=0.3 seed=971824975334294902
+Solution : (0,0),(3,3)
+SolutionCost : 4.24264
+
+
+===== Run #11 =====
+Read GRID 11 successfully: n=5 p=0.48 seed=971824975334294903
+Solution : (0,0),(3,3),(4,4)
+SolutionCost : 5.65685
+
+
+===== Run #12 =====
+Read GRID 12 successfully: n=5 p=0.1 seed=971824975334294904
+Solution : (0,0),(3,3),(4,4)
+SolutionCost : 5.65685
+
+
+===== Run #13 =====
+Read GRID 13 successfully: n=5 p=0.44 seed=971824975334294905
+Solution : (0,0),(3,3),(4,4)
+SolutionCost : 5.65685
+
+
+===== Run #14 =====
+Read GRID 14 successfully: n=6 p=0.05 seed=971824975334294906
+Solution : (0,0),(1,1),(4,4),(5,5)
+SolutionCost : 7.07107
+
+
+===== Run #15 =====
+Read GRID 15 successfully: n=6 p=0.18 seed=971824975334294907
+Solution : (0,0),(3,3),(5,5)
+SolutionCost : 7.07107
+
+
+===== Run #16 =====
+Read GRID 16 successfully: n=7 p=0.47 seed=971824975334294908
+Solution : (0,0),(3,3),(6,6)
+SolutionCost : 8.48528
+
+
+===== Run #17 =====
+Read GRID 17 successfully: n=7 p=0.13 seed=971824975334294909
+Solution : (0,0),(3,3),(6,6)
+SolutionCost : 8.48528
+
+
+===== Run #18 =====
+Read GRID 18 successfully: n=7 p=0 seed=971824975334294910
+Solution : (0,0),(3,3),(6,6)
+SolutionCost : 8.48528
+
+
+===== Run #19 =====
+Read GRID 19 successfully: n=7 p=0.31 seed=971824975334294911
+Solution : (0,0),(3,3),(6,6)
+SolutionCost : 8.48528
+
+
+===== Run #20 =====
+Read GRID 20 successfully: n=7 p=0.01 seed=971824975334294912
+Solution : (0,0),(3,3),(6,6)
+SolutionCost : 8.48528
+
+
+===== Run #21 =====
+Read GRID 21 successfully: n=7 p=0.41 seed=971824975334294913
+Solution : (0,0),(3,3),(6,6)
+SolutionCost : 8.48528
+
+
+===== Run #22 =====
+Read GRID 22 successfully: n=8 p=0.42 seed=971824975334294914
+Solution : (0,0),(3,3),(6,6),(7,7)
+SolutionCost : 9.89949
+
+
+===== Run #23 =====
+Read GRID 23 successfully: n=8 p=0.34 seed=971824975334294915
+Solution : (0,0),(2,2),(5,5),(7,7)
+SolutionCost : 9.89949
+
+
+===== Run #24 =====
+Read GRID 24 successfully: n=8 p=0.3 seed=971824975334294916
+Solution : (0,0),(3,3),(6,6),(7,7)
+SolutionCost : 9.89949
+
+
+===== Run #25 =====
+Read GRID 25 successfully: n=8 p=0.07 seed=971824975334294917
+Solution : (0,0),(3,3),(6,6),(7,7)
+SolutionCost : 9.89949
+
+
+===== Run #26 =====
+Read GRID 26 successfully: n=8 p=0.05 seed=971824975334294918
+Solution : (0,0),(3,3),(6,6),(7,7)
+SolutionCost : 9.89949
+
+
+===== Run #27 =====
+Read GRID 27 successfully: n=8 p=0.16 seed=971824975334294919
+Solution : (0,0),(3,3),(6,6),(7,7)
+SolutionCost : 9.89949
+
+
+===== Run #28 =====
+Read GRID 28 successfully: n=8 p=0.37 seed=971824975334294920
+Solution : (0,0),(3,3),(6,6),(7,7)
+SolutionCost : 9.89949
+
+
+===== Run #29 =====
+Read GRID 29 successfully: n=9 p=0.26 seed=971824975334294921
+Solution : (0,0),(3,3),(5,5),(8,8)
+SolutionCost : 11.3137
+
+
+===== Run #30 =====
+Read GRID 30 successfully: n=10 p=0.3 seed=971824975334294922
+Solution : (0,0),(3,3),(6,6),(9,9)
+SolutionCost : 12.7279
+
+
+===== Run #31 =====
+Read GRID 31 successfully: n=10 p=0 seed=971824975334294923
+Solution : (0,0),(2,2),(5,5),(8,8),(9,9)
+SolutionCost : 12.7279
+
+
+===== Run #32 =====
+Read GRID 32 successfully: n=10 p=0.33 seed=971824975334294924
+Solution : (0,0),(3,3),(6,6),(9,9)
+SolutionCost : 12.7279
+
+
+===== Run #33 =====
+Read GRID 33 successfully: n=10 p=0.37 seed=971824975334294925
+Solution : (0,0),(2,2),(5,5),(8,8),(9,9)
+SolutionCost : 12.7279
+
+
+===== Run #34 =====
+Read GRID 34 successfully: n=10 p=0.08 seed=971824975334294926
+Solution : (0,0),(2,2),(5,5),(8,8),(9,9)
+SolutionCost : 12.7279
+
+
+===== Run #35 =====
+Read GRID 35 successfully: n=10 p=0.27 seed=971824975334294927
+Solution : (0,0),(2,2),(5,5),(8,8),(9,9)
+SolutionCost : 12.7279
+
+
+===== Run #36 =====
+Read GRID 36 successfully: n=10 p=0.13 seed=971824975334294928
+Solution : (0,0),(3,3),(6,6),(9,9)
+SolutionCost : 12.7279
+
+
+===== Run #37 =====
+Read GRID 37 successfully: n=10 p=0.32 seed=971824975334294929
+Solution : (0,0),(1,1),(4,4),(5,5),(8,8),(9,9)
+SolutionCost : 12.7279
+
+
+===== Run #38 =====
+Read GRID 38 successfully: n=10 p=0.23 seed=971824975334294930
+Solution : (0,0),(3,3),(6,6),(9,9)
+SolutionCost : 12.7279
+
+
+===== Run #39 =====
+Read GRID 39 successfully: n=10 p=0.29 seed=971824975334294931
+Solution : (0,0),(2,2),(5,5),(8,8),(9,9)
+SolutionCost : 12.7279
+
+
+===== Run #40 =====
+Read GRID 40 successfully: n=11 p=0.36 seed=971824975334294932
+Solution : (0,0),(2,2),(5,5),(6,6),(9,9),(10,10)
+SolutionCost : 14.1421
+
+
+===== Run #41 =====
+Read GRID 41 successfully: n=11 p=0.34 seed=971824975334294933
+Solution : (0,0),(3,3),(6,6),(7,7),(10,10)
+SolutionCost : 14.1421
+
+
+===== Run #42 =====
+Read GRID 42 successfully: n=11 p=0.36 seed=971824975334294934
+Solution : (0,0),(3,3),(6,6),(9,9),(10,10)
+SolutionCost : 14.1421
+
+
+===== Run #43 =====
+Read GRID 43 successfully: n=11 p=0.03 seed=971824975334294935
+Solution : (0,0),(2,2),(5,5),(7,7),(10,10)
+SolutionCost : 14.1421
+
+
+===== Run #44 =====
+Read GRID 44 successfully: n=11 p=0.15 seed=971824975334294936
+Solution : (0,0),(2,2),(5,5),(6,6),(7,7),(10,10)
+SolutionCost : 14.1421
+
+
+===== Run #45 =====
+Read GRID 45 successfully: n=11 p=0.29 seed=971824975334294937
+Solution : (0,0),(2,2),(5,5),(6,6),(9,9),(10,10)
+SolutionCost : 14.1421
+
+
+===== Run #46 =====
+Read GRID 46 successfully: n=11 p=0.07 seed=971824975334294938
+Solution : (0,0),(3,3),(6,6),(9,9),(10,10)
+SolutionCost : 14.1421
+
+
+===== Run #47 =====
+Read GRID 47 successfully: n=11 p=0.28 seed=971824975334294939
+Solution : (0,0),(3,3),(6,6),(7,7),(10,10)
+SolutionCost : 14.1421
+
+
+===== Run #48 =====
+Read GRID 48 successfully: n=11 p=0.14 seed=971824975334294940
+Solution : (0,0),(3,3),(6,6),(7,7),(10,10)
+SolutionCost : 14.1421
+
+
+===== Run #49 =====
+Read GRID 49 successfully: n=12 p=0.42 seed=971824975334294941
+Solution : (0,0),(3,3),(6,6),(9,9),(11,11)
+SolutionCost : 15.5563
+
+
+===== Run #50 =====
+Read GRID 50 successfully: n=12 p=0.11 seed=971824975334294942
+Solution : (0,0),(2,2),(4,4),(7,7),(10,10),(11,11)
+SolutionCost : 15.5563
+
+
+===== Run #51 =====
+Read GRID 51 successfully: n=12 p=0.48 seed=971824975334294943

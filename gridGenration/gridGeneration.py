@@ -28,7 +28,7 @@ import secrets
 import hashlib
 import os
 
-def generate_grid(n, p, seed=None, mode='monotonic', max_walk_attempts=1000):
+def generate_grid(n, p, seed=None, mode='random_walk', max_walk_attempts=1000):
     assert n >= 1
     assert 0.0 <= p <= 1.0
     if seed is not None:

@@ -324,7 +324,7 @@ int main(int argc, char** argv) {
         for (int j = 0; j < noOfAnts; ++j) {
             ants[j]->restartPath();
         }
-        cout << iter << ", "<< std::flush;
+        // cout << iter << ", "<< std::flush;
 
         solutions.push_back(vector<Position>());
         solutions.back().push_back(Position(0, 0));
@@ -349,6 +349,7 @@ int main(int argc, char** argv) {
         solution.push_back(next);
         if (next.row == -1 && next.col == -1) break;
     }
+    //printing the solution do not remove it
     cout << "Solution : " << solution[0]<< std::flush;
     for (size_t j = 1; j < solution.size(); ++j) {
         cout << "," << solution[j]<< std::flush;
