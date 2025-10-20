@@ -81,7 +81,6 @@ def generate_grid(n, p, seed=None, mode='random_walk', max_walk_attempts=1000):
                 mark_path(path)
                 success = True
         if not success:
-            # fallback to monotonic
             return generate_grid(n, p, seed=seed, mode='monotonic')
     else:
         raise ValueError("mode must be 'monotonic' or 'random_walk'")
@@ -98,7 +97,6 @@ def main():
     parser.add_argument("--seed", type=int, default=None, help="optional base seed (64-bit int). If omitted a high-quality seed is chosen.")
     args = parser.parse_args()
 
-    # choose an "excellent" base seed if not provided
     if args.seed is None:
         seed_base = int.from_bytes(hashlib.sha256(os.urandom(64)).digest()[:8], "big")
     else:
@@ -121,13 +119,11 @@ def main():
                 print(f"Skipping row {idx} ({row}): parse error {e}")
                 continue
             per_seed = (seed_base + idx) & ((1<<63)-1)
-            # generate
             grid = generate_grid(n, p, seed=per_seed, mode=args.mode)
-            # header containing metadata so the C++ loader can parse it
             outf.write(f"GRID {idx} n={n} p={p} seed={per_seed}\n")
             for r in range(n):
                 outf.write(" ".join(str(x) for x in grid[r]) + "\n")
-            outf.write("\n")  # blank line between grids
+            outf.write("\n")
     print(f"Wrote {len(rows)} grids to {args.output_grids} with base seed {seed_base}")
 
 if __name__ == "__main__":

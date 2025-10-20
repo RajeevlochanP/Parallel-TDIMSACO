@@ -81,15 +81,16 @@ public:
     int stepSize;
     double alpha, beta;
 
-    static mt19937 rng;
+    mt19937 rng;
 
-    AntT(GraphT* grid, int stepSize, double alpha, double beta) {
+    AntT(GraphT* grid, int stepSize, double alpha, double beta, unsigned int seed) {
         this->grid = grid;
         this->path.clear();
         this->pathCost = 0.0;
         this->stepSize = stepSize;
         this->alpha = alpha;
         this->beta = beta;
+        this->rng = mt19937(seed);
     }
 
     bool isAllowed(const Position& p1, const Position& p2) {
@@ -116,7 +117,7 @@ public:
 
         double dx = i2 - i1;
         double dy = j2 - j1;
-        int steps = (int) (max(fabs(dx), fabs(dy)) * 1000.0);
+        int steps = (int) (max(fabs(dx), fabs(dy)) * 10000.0);
         if (steps <= 0) steps = 1;
         double xinc = dx / (double)steps;
         double yinc = dy / (double)steps;
@@ -282,8 +283,6 @@ vector<vector<char>> readGridFromFile(const string& filePath, int gridIndex) {
     return grid;
 }
 
-mt19937 AntT::rng((unsigned)chrono::high_resolution_clock::now().time_since_epoch().count());
-
 int main(int argc, char** argv) {
     if (argc < 3) {
         cout << "Usage: " << argv[0] << " <path to grids.txt> <grid_index>\n" << std::flush;
@@ -307,9 +306,11 @@ int main(int argc, char** argv) {
     ants.reserve(noOfAnts);
     Position goalPosition(grid.size - 1, grid.size - 1);
 
+    unsigned int baseSeed = 69;
+
     //ants creation and pushing into vectors i think with reduction i can do this in O(log(ants count))
     for (int i = 0; i < noOfAnts; ++i) {
-        ants.emplace_back(make_unique<AntT>(&grid, stepSize, alpha, beta));
+        ants.emplace_back(make_unique<AntT>(&grid, stepSize, alpha, beta, baseSeed+i));
     }
 
     for (int iter = 0; iter < noOfIterations; ++iter) {
@@ -324,7 +325,7 @@ int main(int argc, char** argv) {
         for (int j = 0; j < noOfAnts; ++j) {
             ants[j]->restartPath();
         }
-        // cout << iter << ", "<< std::flush;
+        cout << iter << ", "<< std::flush;
 
         solutions.push_back(vector<Position>());
         solutions.back().push_back(Position(0, 0));

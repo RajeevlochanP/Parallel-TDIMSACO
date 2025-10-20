@@ -1,5 +1,4 @@
 #include <bits/stdc++.h>
-#include <omp.h>
 using namespace std;
 
 struct Position {
@@ -95,8 +94,6 @@ public:
     }
 
     bool isAllowed(const Position& p1, const Position& p2) {
-
-        char flag=1;
         // cout << p1 << "  " << p2 << endl;
         double i1 = p1.row + 0.5;
         double j1 = p1.col + 0.5;
@@ -124,15 +121,10 @@ public:
         if (steps <= 0) steps = 1;
         double xinc = dx / (double)steps;
         double yinc = dy / (double)steps;
-
-        double x0 = i1;
-        double y0 = j1;
         //parllelizable just checking at all i1,j1 doing it from k=0 to steps
-        #pragma omp parallel for private(i1, j1)
-        for (int k = 0; k < steps; k++) {
-            if(flag==0) continue;
-            i1 = x0 + (k+1)*xinc;
-            j1 = y0 + (k+1)*yinc;
+        for (int k = 0; k < steps; ++k) {
+            i1 += xinc;
+            j1 += yinc;
             int i, j;
             if (fabs(ceil(i1) - i1) < 1e-9) {
                 i = (int)ceil(i1);
@@ -150,22 +142,14 @@ public:
 
             if (i >= 0 && i < (int)grid->graph.size() && j >= 0 && j < (int)grid->graph[0].size()) {
                 if (grid->graph[i][j]==1) {
-                    // return false;
-                    #pragma omp critical
-                    {
-                        flag = 0;
-                    }
+                    return false;
                 }
             } else {
-                // return false;
-                #pragma omp critical
-                {
-                    flag = 0;
-                }
+                return false;
             }
         }
 
-        return (flag==1);
+        return true;
     }
 
     // Return Position(-1,-1) on failure
@@ -174,12 +158,16 @@ public:
         int col = currPosition.col;
         Position target(grid->size - 1, grid->size - 1);
         vector<Position> allowed;
+        #pragma omp parallel for num_threads(2) collapse(2)
         for (int i = row - stepSize; i <= row + stepSize; ++i) {
             for (int j = col - stepSize; j <= col + stepSize; ++j) {
                 if (i == row && j == col) continue;
                 Position p(i, j);
                 if (isAllowed(currPosition, p)) {
-                    allowed.push_back(p);
+                    #pragma omp critical
+                    {
+                        allowed.push_back(p);
+                    }
                 }
             }
         }
@@ -323,7 +311,6 @@ int main(int argc, char** argv) {
     Position goalPosition(grid.size - 1, grid.size - 1);
 
     unsigned int baseSeed = 69;
-    omp_set_num_threads(20);
 
     //ants creation and pushing into vectors i think with reduction i can do this in O(log(ants count))
     for (int i = 0; i < noOfAnts; ++i) {
@@ -332,7 +319,7 @@ int main(int argc, char** argv) {
 
     for (int iter = 0; iter < noOfIterations; ++iter) {
         //completely independent so parllelize not even shared memory zero communication needed but after completion barrier is needed
-        // #pragma omp parallel for num_threads(4)
+        #pragma omp parallel for num_threads(10)
         for (int j = 0; j < noOfAnts; ++j) {
             ants[j]->findSolution();
         }

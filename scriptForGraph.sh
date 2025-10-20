@@ -10,31 +10,34 @@ mkdir -p "$(dirname "$CSV_FILE")"
 echo "Compiling $SRC..."
 g++ -std=c++17 "$SRC" -o "$EXE"
 if [ $? -ne 0 ]; then
-    echo "❌ Compilation failed!"
+    echo "Compilation failed!"
     exit 1
 fi
 
-# Write CSV header
 echo "index,n,p,solutionCost,timeTaken(s)" > "$CSV_FILE"
 
 echo "Running $EXE for indexes 0 to 94..."
 for i in $(seq 0 94); do
-    START_TIME=$(date +%s.%N)
+    start=$(date +%s%N)
 
     OUTPUT=$(./"$EXE" "$GRID_FILE" "$i")
 
-    END_TIME=$(date +%s.%N)
-    TIME_TAKEN=$(echo "$END_TIME - $START_TIME" | bc)
+    end=$(date +%s%N)
 
-    # Parse n, p, and SolutionCost using grep and regex
+    elapsed_ns=$((end - start))
+    TIME_TAKEN=$(echo "scale=6; $elapsed_ns / 1000000000" | bc -l)
+
     N_VAL=$(echo "$OUTPUT" | grep -oP 'n=\K[0-9]+')
     P_VAL=$(echo "$OUTPUT" | grep -oP 'p=\K[0-9.]+')
     COST_VAL=$(echo "$OUTPUT" | grep -oP 'SolutionCost\s*:\s*\K[0-9.]+')
 
-    # Append to CSV
+    N_VAL=${N_VAL:-NA}
+    P_VAL=${P_VAL:-NA}
+    COST_VAL=${COST_VAL:-NA}
+
     echo "$i,$N_VAL,$P_VAL,$COST_VAL,$TIME_TAKEN" >> "$CSV_FILE"
 
     echo "Run #$i → n=$N_VAL p=$P_VAL cost=$COST_VAL time=${TIME_TAKEN}s"
 done
 
-echo "✅ All runs complete. CSV saved to: $CSV_FILE"
+echo "All runs complete. CSV saved to: $CSV_FILE"

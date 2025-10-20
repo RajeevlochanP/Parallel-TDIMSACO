@@ -1,0 +1,11 @@
+Index		% time	children  called	     name      <spontaneous>
+[1]     	74.0    9.42                     main [1]
+                    8.60      200/200                  AntT::findSolution() [4]
+                    0.78      200/200                  AntT::restartPath() [10]
+-------------------------------------------------------------------------------------------------------------------------------------
+                    4.96      632208/632208            AntT::nextPosition(Position const&) [3]
+[2]         67.6    4.96      632208                   AntT::isAllowed(Position const&, Position const&) [2]
+-------------------------------------------------------------------------------------------------------------------------------------
+                    8.60      13171/13171              AntT::findSolution() [4]
+[3]         67.6    8.60      13171                    AntT::nextPosition(Position const&) [3]
+                    4.96      632208/632208            AntT::isAllowed(Position const&, Position const&) [2]

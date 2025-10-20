@@ -13,7 +13,7 @@ if [ $? -ne 0 ]; then
 fi
 
 for i in $(seq 1 $NUM_RUNS); do
-    INDEX=$i
+    INDEX=$((i + 90))
     echo "Run #$i → index = $INDEX"
 
     ./"$EXE" "$GRID_FILE" "$INDEX" > "./outputs/output_$i.txt"
@@ -24,6 +24,4 @@ for i in $(seq 1 $NUM_RUNS); do
     rm gmon.out
 done
 
-echo "✅ All runs complete. Profiling results: file1.txt, file2.txt, file3.txt"
-
-Script
+echo "All runs complete. Profiling results: file1.txt, file2.txt, file3.txt"s

@@ -22,6 +22,6 @@ int main() {
     }
 
     file.close();
-    std::cout << "✅ Data written successfully to input.csv\n";
+    std::cout << "Data written successfully to input.csv\n";
     return 0;
 }
