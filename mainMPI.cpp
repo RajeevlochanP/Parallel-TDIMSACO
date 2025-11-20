@@ -330,7 +330,7 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    // If worker node ? then receive the data 
+    // If worker node ? then allocate the space to receive data 
     if (rank != 0) {
         test.resize(n, vector<char>(n));
     }
@@ -364,62 +364,171 @@ int main(int argc, char** argv) {
     int noOfAnts = 10, noOfIterations = 20, stepSize = 3;
     double alpha = 1.5, beta = 0.8;
     vector<double> solutionsCost(noOfIterations);
-    vector<unique_ptr<AntT>> ants;
-    ants.reserve(noOfAnts);
+    // vector<unique_ptr<AntT>> ants;
+    // ants.reserve(noOfAnts);
     Position goalPosition(grid.size - 1, grid.size - 1);
 
     unsigned int baseSeed = 69;
 
-    //ants creation and pushing into vectors i think with reduction i can do this in O(log(ants count))
-    for (int i = 0; i < noOfAnts; ++i) {
-        ants.emplace_back(make_unique<AntT>(&grid, stepSize, alpha, beta, baseSeed+i));
+
+    // Dividing the work 
+    int ants_per_process = noOfAnts / world_size;
+    int remainder = noOfAnts % world_size;
+
+    int local_start_ant = rank * ants_per_process + min(rank, remainder);
+    // Split one iteration per process untill we have extra iterations
+    int local_end_ant = local_start_ant + ants_per_process + (rank < remainder ? 1 : 0);  
+    int local_noOfAnts = local_end_ant - local_start_ant;
+
+    // Each process creates only its ants
+    vector<unique_ptr<AntT>> local_ants;
+    local_ants.reserve(local_noOfAnts);
+
+
+    for (int i = local_start_ant; i < local_end_ant; ++i) {
+        // baseSeed + i just to ensure different random sequence for each ant as in seq code
+        local_ants.emplace_back(make_unique<AntT>(&grid, stepSize, alpha, beta, baseSeed + i));
     }
 
-    for (int iter = 0; iter < noOfIterations; ++iter) {
-        //completely independent so parllelize not even shared memory zero communication needed but after completion barrier is needed
-        for (int j = 0; j < noOfAnts; ++j) {
-            ants[j]->findSolution();
-        }
-        //must not parllelize as it contains too much interaction with shared memory
-        for (int j = 0; j < noOfAnts; ++j) {
-            grid.updateTdiValues(ants[j]->path);
-        }
-        for (int j = 0; j < noOfAnts; ++j) {
-            ants[j]->restartPath();
-        }
-        cout << iter << ", "<< std::flush;
+        for (int iter = 0; iter < noOfIterations; ++iter) {
+        // Each process running its own ants --> main parallelism done here
+            for (int j = 0; j < local_noOfAnts; ++j) {
+                local_ants[j]->findSolution();
+            }
 
-        solutions.push_back(vector<Position>());
-        solutions.back().push_back(Position(0, 0));
-        while (!(solutions.back().back() == goalPosition)) {
-            Position last = solutions.back().back();
+        //Path length will vary across iterations so serializing this 
+        // tentative format [path1_len, p1.row, p1.col, ..., path2_len, p2.row, p2.col, ...]
+        
+            vector<int> local_paths_data;
+            for (int j = 0; j < local_noOfAnts; ++j) {
+                local_paths_data.push_back(local_ants[j]->path.size());
+                for (const auto& pos : local_ants[j]->path) {
+                    local_paths_data.push_back(pos.row);
+                    local_paths_data.push_back(pos.col);
+                }
+            }
+
+            if (rank != 0) {
+                int data_size = local_paths_data.size();
+                MPI_Send(&data_size, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
+                MPI_Send(local_paths_data.data(), data_size, MPI_INT, 0, 1, MPI_COMM_WORLD);
+
+            } else {
+                //  Update grid with its own paths in master node
+                for (int j = 0; j < local_noOfAnts; ++j) {
+                    grid.updateTdiValues(local_ants[j]->path);
+                }
+
+                //  receive from all other nodes and update grid 
+                for (int worker_rank = 1; worker_rank < world_size; ++worker_rank) {
+                    int received_size;
+                    MPI_Recv(&received_size, 1, MPI_INT, worker_rank, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                    
+                    vector<int> worker_path_data(received_size);
+                    MPI_Recv(worker_path_data.data(), received_size, MPI_INT, worker_rank, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
+                    // Deserialize and update grid
+                    int idx = 0;
+                    while (idx < received_size) {
+                        int path_len = worker_path_data[idx++];
+                        if (path_len == 0) continue; 
+
+                        vector<Position> received_path;
+                        received_path.reserve(path_len);
+                        for (int k = 0; k < path_len; ++k) {
+                            int r = worker_path_data[idx++];
+                            int c = worker_path_data[idx++];
+                            received_path.emplace_back(r, c);
+                        }
+                        grid.updateTdiValues(received_path);
+                    }
+                }
+            }
+
+        // All processes do this on their local ants
+            for (int j = 0; j < local_noOfAnts; ++j) {
+                local_ants[j]->restartPath();
+            }
+
+        // braodcast the updated grid so that other process can access the correct values in next iters
+            int grid_n = grid.size;
+            
+            // Flatten and Broadcast tdiValues (vector<vector<double>>)
+            vector<double> flat_tdi(grid_n * grid_n);
+            if (rank == 0) {
+                for (int i = 0; i < grid_n; ++i)
+                    for (int j = 0; j < grid_n; ++j)
+                        flat_tdi[i * grid_n + j] = grid.tdiValues[i][j];
+            }
+            MPI_Bcast(flat_tdi.data(), grid_n * grid_n, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+            // All processes un-flatten
+            for (int i = 0; i < grid_n; ++i)
+                for (int j = 0; j < grid_n; ++j)
+                    grid.tdiValues[i][j] = flat_tdi[i * grid_n + j];
+
+
+        // Flatten and Broadcast index_data (vector<vector<Position>>)
+        // A Position is 2 ints (row, col)
+            vector<int> flat_index(grid_n * grid_n * 2);
+            if (rank == 0) {
+                for (int i = 0; i < grid_n; ++i) {
+                    for (int j = 0; j < grid_n; ++j) {
+                        flat_index[(i * grid_n + j) * 2 + 0] = grid.index_data[i][j].row;
+                        flat_index[(i * grid_n + j) * 2 + 1] = grid.index_data[i][j].col;
+                    }
+                }
+            }
+            MPI_Bcast(flat_index.data(), grid_n * grid_n * 2, MPI_INT, 0, MPI_COMM_WORLD);
+            // All processes un-flatten
+            for (int i = 0; i < grid_n; ++i) {
+                for (int j = 0; j < grid_n; ++j) {
+                    grid.index_data[i][j].row = flat_index[(i * grid_n + j) * 2 + 0];
+                    grid.index_data[i][j].col = flat_index[(i * grid_n + j) * 2 + 1];
+                }
+            }
+
+            // LOgging only at master node
+            if (rank == 0) {
+                cout << iter << ", " << std::flush;
+
+                // This solution-tracking logic also only runs on the master
+                solutions.push_back(vector<Position>());
+                solutions.back().push_back(Position(0, 0));
+                while (!(solutions.back().back() == goalPosition)) {
+                    Position last = solutions.back().back();
+                    Position next = grid.index_data[last.row][last.col];
+                    solutions.back().push_back(next);
+                    if (next.row == -1 && next.col == -1) break;
+                }
+
+                double sc = 0.0;
+                for (size_t k = 1; k < solutions.back().size(); ++k) {
+                    if (solutions.back()[k].row == -1) break; // Handle failed paths
+                    sc += GraphT::distance(solutions.back()[k-1], solutions.back()[k]);
+                }
+                solutionsCost[iter] = sc;
+            }
+    } 
+    if (rank == 0) {
+        solution.push_back(Position(0, 0));
+        while (!(solution.back() == goalPosition)) {
+            Position last = solution.back();
             Position next = grid.index_data[last.row][last.col];
-            solutions.back().push_back(next);
-            if (next.row == -1 && next.col == -1) break;
+            if (next.row == -1 && next.col == -1) {
+                 cout << "\nFailed to find a complete solution." << endl;
+                 break;
+            }
+            solution.push_back(next);
+        }
+        
+        cout << "\nSolution : " << solution[0] << std::flush;
+        for (size_t j = 1; j < solution.size(); ++j) {
+            cout << "," << solution[j] << std::flush;
+            solutionCost += GraphT::distance(solution[j-1], solution[j]);
         }
 
-        double sc = 0.0;
-        for (size_t k = 1; k < solutions.back().size(); ++k) {
-            sc += GraphT::distance(solutions.back()[k-1], solutions.back()[k]);
-        }
-        solutionsCost[iter] = sc;
+        cout << "\nSolutionCost : " << solutionCost << endl;
     }
-
-    solution.push_back(Position(0, 0));
-    while (!(solution.back() == goalPosition)) {
-        Position last = solution.back();
-        Position next = grid.index_data[last.row][last.col];
-        solution.push_back(next);
-        if (next.row == -1 && next.col == -1) break;
-    }
-    //printing the solution do not remove it
-    cout << "Solution : " << solution[0]<< std::flush;
-    for (size_t j = 1; j < solution.size(); ++j) {
-        cout << "," << solution[j]<< std::flush;
-        solutionCost += GraphT::distance(solution[j-1], solution[j]);
-    }
-
-    cout << "\nSolutionCost : " << solutionCost << endl;
 
     MPI_Finalize();
     return 0;
