@@ -313,6 +313,7 @@ int main(int argc, char** argv) {
         ants.emplace_back(make_unique<AntT>(&grid, stepSize, alpha, beta, baseSeed+i));
     }
 
+    
     for (int iter = 0; iter < noOfIterations; ++iter) {
         //completely independent so parllelize not even shared memory zero communication needed but after completion barrier is needed
         for (int j = 0; j < noOfAnts; ++j) {

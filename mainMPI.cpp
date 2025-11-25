@@ -385,10 +385,14 @@ int main(int argc, char** argv) {
     local_ants.reserve(local_noOfAnts);
 
 
-    for (int i = local_start_ant; i < local_end_ant; ++i) {
-        // baseSeed + i just to ensure different random sequence for each ant as in seq code
-        local_ants.emplace_back(make_unique<AntT>(&grid, stepSize, alpha, beta, baseSeed + i));
-    }
+
+        for (int i = local_start_ant; i < local_end_ant; ++i) {
+            // baseSeed + i just to ensure different random sequence for each ant as in seq code
+            local_ants.emplace_back(make_unique<AntT>(&grid, stepSize, alpha, beta, baseSeed + i));
+        }
+
+        MPI_Barrier(MPI_COMM_WORLD);
+        double start=MPI_Wtime();
 
         for (int iter = 0; iter < noOfIterations; ++iter) {
         // Each process running its own ants --> main parallelism done here
@@ -509,26 +513,31 @@ int main(int argc, char** argv) {
                 solutionsCost[iter] = sc;
             }
     } 
-    if (rank == 0) {
-        solution.push_back(Position(0, 0));
-        while (!(solution.back() == goalPosition)) {
-            Position last = solution.back();
-            Position next = grid.index_data[last.row][last.col];
-            if (next.row == -1 && next.col == -1) {
-                 cout << "\nFailed to find a complete solution." << endl;
-                 break;
-            }
-            solution.push_back(next);
-        }
-        
-        cout << "\nSolution : " << solution[0] << std::flush;
-        for (size_t j = 1; j < solution.size(); ++j) {
-            cout << "," << solution[j] << std::flush;
-            solutionCost += GraphT::distance(solution[j-1], solution[j]);
-        }
 
-        cout << "\nSolutionCost : " << solutionCost << endl;
-    }
+        MPI_Barrier(MPI_COMM_WORLD);
+        double end=MPI_Wtime();
+
+        if (rank == 0) {
+            solution.push_back(Position(0, 0));
+            while (!(solution.back() == goalPosition)) {
+                Position last = solution.back();
+                Position next = grid.index_data[last.row][last.col];
+                if (next.row == -1 && next.col == -1) {
+                    cout << "\nFailed to find a complete solution." << endl;
+                    break;
+                }
+                solution.push_back(next);
+            }
+            
+            cout << "\nSolution : " << solution[0] << std::flush;
+            for (size_t j = 1; j < solution.size(); ++j) {
+                cout << "," << solution[j] << std::flush;
+                solutionCost += GraphT::distance(solution[j-1], solution[j]);
+            }
+
+            cout << "\nSolutionCost : " << solutionCost << endl;
+            cout<< "\nExecution time: "<<end-start<<endl;
+        }
 
     MPI_Finalize();
     return 0;
