@@ -16,6 +16,10 @@ struct Position {
     }
 };
 
+#pragma omp declare reduction(merge : std::vector<Position> : \
+    omp_out.insert(omp_out.end(), omp_in.begin(), omp_in.end())) \
+    initializer(omp_priv = std::vector<Position>())
+
 class GraphT {
 public:
     vector<vector<char>> graph;
@@ -158,19 +162,24 @@ public:
         int col = currPosition.col;
         Position target(grid->size - 1, grid->size - 1);
         vector<Position> allowed;
-        #pragma omp parallel for num_threads(2) collapse(2)
+        #pragma omp parallel for num_threads(2) collapse(2) reduction(merge: allowed)
         for (int i = row - stepSize; i <= row + stepSize; ++i) {
             for (int j = col - stepSize; j <= col + stepSize; ++j) {
                 if (i == row && j == col) continue;
                 Position p(i, j);
                 if (isAllowed(currPosition, p)) {
-                    #pragma omp critical
-                    {
-                        allowed.push_back(p);
-                    }
+                    // printf("(%d,%d)",i,j);
+                    allowed.push_back(p);
                 }
             }
         }
+
+        //because allowed order changes
+        std::sort(allowed.begin(), allowed.end(), [](const Position &a, const Position &b){
+            if (a.row == b.row) return a.col < b.col;
+            return a.row < b.row;
+        });
+
         if (allowed.empty()) {
             cout << "No solution for this graph" << endl;
             return Position(-1, -1);
@@ -355,7 +364,7 @@ int main(int argc, char** argv) {
         solution.push_back(next);
         if (next.row == -1 && next.col == -1) break;
     }
-    //printing the solution do not remove it
+    //printing the solution Ali dont remove
     cout << "Solution : " << solution[0]<< std::flush;
     for (size_t j = 1; j < solution.size(); ++j) {
         cout << "," << solution[j]<< std::flush;

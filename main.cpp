@@ -167,6 +167,13 @@ public:
                 }
             }
         }
+
+        //because allowed order changes
+        std::sort(allowed.begin(), allowed.end(), [](const Position &a, const Position &b){
+            if (a.row == b.row) return a.col < b.col;
+            return a.row < b.row;
+        });
+
         if (allowed.empty()) {
             cout << "No solution for this graph" << endl;
             return Position(-1, -1);
