@@ -301,12 +301,13 @@ int main(int argc, char** argv) {
     // getting grid from file
     vector<vector<char>> test=readGridFromFile(filePath,gridIndex);
 
-
+    auto t0 = std::chrono::steady_clock::now();
+    //main algorithm starts here
     GraphT grid((int)test.size(),test);
     vector<Position> solution;
     double solutionCost = 0.0;
     vector<vector<Position>> solutions;
-    int noOfAnts = 10, noOfIterations = 20, stepSize = 3;
+    int noOfAnts = atoi(argv[3]), noOfIterations = atoi(argv[4]), stepSize = 3;
     double alpha = 1.5, beta = 0.8;
     vector<double> solutionsCost(noOfIterations);
     vector<unique_ptr<AntT>> ants;
@@ -333,7 +334,7 @@ int main(int argc, char** argv) {
         for (int j = 0; j < noOfAnts; ++j) {
             ants[j]->restartPath();
         }
-        cout << iter << ", "<< std::flush;
+        // cout << iter << ", "<< std::flush;
 
         solutions.push_back(vector<Position>());
         solutions.back().push_back(Position(0, 0));
@@ -358,6 +359,10 @@ int main(int argc, char** argv) {
         solution.push_back(next);
         if (next.row == -1 && next.col == -1) break;
     }
+    auto t1 = std::chrono::steady_clock::now();
+    double sec = std::chrono::duration<double>(t1 - t0).count();
+    cout << "Time taken: " << sec << " seconds" << endl;
+    //end of main algorithm
     //printing the solution do not remove it
     cout << "Solution : " << solution[0]<< std::flush;
     for (size_t j = 1; j < solution.size(); ++j) {

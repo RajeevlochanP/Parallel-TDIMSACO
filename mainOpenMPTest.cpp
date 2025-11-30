@@ -1,4 +1,5 @@
 #include <bits/stdc++.h>
+#include <omp.h>
 using namespace std;
 
 struct Position {
@@ -162,7 +163,7 @@ public:
         int col = currPosition.col;
         Position target(grid->size - 1, grid->size - 1);
         vector<Position> allowed;
-        #pragma omp parallel for num_threads(2) collapse(2) reduction(merge: allowed)
+        // #pragma omp parallel for num_threads(18) collapse(2) reduction(merge: allowed)
         for (int i = row - stepSize; i <= row + stepSize; ++i) {
             for (int j = col - stepSize; j <= col + stepSize; ++j) {
                 if (i == row && j == col) continue;
@@ -175,10 +176,10 @@ public:
         }
 
         //because allowed order changes
-        std::sort(allowed.begin(), allowed.end(), [](const Position &a, const Position &b){
-            if (a.row == b.row) return a.col < b.col;
-            return a.row < b.row;
-        });
+        // std::sort(allowed.begin(), allowed.end(), [](const Position &a, const Position &b){
+        //     if (a.row == b.row) return a.col < b.col;
+        //     return a.row < b.row;
+        // });
 
         if (allowed.empty()) {
             cout << "No solution for this graph" << endl;
@@ -304,15 +305,18 @@ int main(int argc, char** argv) {
     // taking required inputs
     char* filePath = argv[1];
     int gridIndex = atoi(argv[2]);
+    double start_time, end_time;
     // getting grid from file
     vector<vector<char>> test=readGridFromFile(filePath,gridIndex);
 
+    //main algorithm starts here
+    start_time = omp_get_wtime();
 
     GraphT grid((int)test.size(),test);
     vector<Position> solution;
     double solutionCost = 0.0;
     vector<vector<Position>> solutions;
-    int noOfAnts = 10, noOfIterations = 20, stepSize = 3;
+    int noOfAnts = atoi(argv[3]), noOfIterations = atoi(argv[4]), stepSize = 3;
     double alpha = 1.5, beta = 0.8;
     vector<double> solutionsCost(noOfIterations);
     vector<unique_ptr<AntT>> ants;
@@ -328,7 +332,7 @@ int main(int argc, char** argv) {
 
     for (int iter = 0; iter < noOfIterations; ++iter) {
         //completely independent so parllelize not even shared memory zero communication needed but after completion barrier is needed
-        #pragma omp parallel for num_threads(10)
+        #pragma omp parallel for
         for (int j = 0; j < noOfAnts; ++j) {
             ants[j]->findSolution();
         }
@@ -339,7 +343,7 @@ int main(int argc, char** argv) {
         for (int j = 0; j < noOfAnts; ++j) {
             ants[j]->restartPath();
         }
-        cout << iter << ", "<< std::flush;
+        // cout << iter << ", "<< std::flush;
 
         solutions.push_back(vector<Position>());
         solutions.back().push_back(Position(0, 0));
@@ -364,6 +368,11 @@ int main(int argc, char** argv) {
         solution.push_back(next);
         if (next.row == -1 && next.col == -1) break;
     }
+
+    end_time = omp_get_wtime();
+    double sec = end_time - start_time;
+    cout << "Time taken: " << sec << " seconds" << endl;
+    //end of main algorithm
     //printing the solution Ali dont remove
     cout << "Solution : " << solution[0]<< std::flush;
     for (size_t j = 1; j < solution.size(); ++j) {
