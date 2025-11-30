@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # indices=(11,30,71,91,118,141,157,187)
-indices=(15 16 22 29 30);  
+indices=(15 16 22 29 30);
 
 exe="./mainMPI.out"
 gridFile="./gridGenration/grids.txt"

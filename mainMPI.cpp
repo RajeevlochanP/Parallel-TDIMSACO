@@ -361,7 +361,7 @@ int main(int argc, char** argv) {
     vector<Position> solution;
     double solutionCost = 0.0;
     vector<vector<Position>> solutions;
-    int noOfAnts = 10, noOfIterations = 20, stepSize = 3;
+    int noOfAnts = atoi(argv[3]), noOfIterations = atoi(argv[4]), stepSize = 3;
     double alpha = 1.5, beta = 0.8;
     vector<double> solutionsCost(noOfIterations);
     // vector<unique_ptr<AntT>> ants;

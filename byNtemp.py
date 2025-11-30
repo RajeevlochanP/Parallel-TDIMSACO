@@ -9,8 +9,8 @@ SOURCE_FILES = [
         'compiler': 'g++',
         'src': 'main.cpp', 
         'out': './main', 
-        'flags': ['-std=c++17']
-        'run_cmd' :[]
+        'flags': ['-std=c++17'],
+        'run_cmd': []
     },
     {
         'compiler': 'mpic++',
@@ -29,11 +29,11 @@ TEST_CONFIGS = [
 ]
 
 GRID_FILE_PATH = "./gridGenration/grids.txt"
-GRID_RANGE = range(0, 70)
+GRID_RANGE = range(0, 71)
 OUTPUT_CSV = "groupByN_MPI.csv"
 
 def compile_code():
-    print("Compiling..!")
+    print("Compiling Sources ")
     for file_info in SOURCE_FILES:
         cmd = [file_info['compiler']] + file_info['flags'] + [file_info['src'], "-o", file_info['out']]
         print(f"Compiling {file_info['src']}...")
@@ -45,6 +45,7 @@ def compile_code():
 
 def parse_output(output_str):
     data = {}
+    
     n_match = re.search(r"n=(\d+)", output_str)
     if n_match:
         data['n'] = int(n_match.group(1))
@@ -59,16 +60,16 @@ def parse_output(output_str):
         
     return data
 
+
 def main():
     compile_code()
     
     aggregated_data = defaultdict(lambda: defaultdict(list))
     
-    print(f"Running for Grids {GRID_RANGE.start} to {GRID_RANGE.stop - 1}")
+    print(f"Running Experiments for Grids {GRID_RANGE.start} to {GRID_RANGE.stop - 1} ")
 
     for grid_id in GRID_RANGE:
         current_n = None
-        
         for (ants, iters) in TEST_CONFIGS:
             
             current_paths = {} 
@@ -76,26 +77,28 @@ def main():
             for file_info in SOURCE_FILES:
                 exe = file_info['out']
                 filename = file_info['src']
+                run_prefix = file_info['run_cmd'] 
                 
                 try:
-                    cmd = [exe, GRID_FILE_PATH, str(grid_id), str(ants), str(iters)]
+                    args = [exe, GRID_FILE_PATH, str(grid_id), str(ants), str(iters)]
                     
-                    result = subprocess.run(cmd, capture_output=True, text=True)
+                    full_cmd = run_prefix + args
+                    
+                    result = subprocess.run(full_cmd, capture_output=True, text=True)
                     
                     output = result.stdout
                     parsed = parse_output(output)
                     
                     if 'n' not in parsed or 'time' not in parsed:
-                        print(f"Warning: Could not parse output for {filename} on Grid {grid_id}")
+                        print(f"Could not parse output for {filename} on Grid {grid_id}")
                         continue
                     if current_n is None:
                         current_n = parsed['n']
                     elif current_n != parsed['n']:
-                        print(f"CRITICAL ERROR: Mismatch in grid size for Grid {grid_id} (Expected {current_n}, got {parsed['n']})")
+                        print(f"Mismatch in grid size for Grid {grid_id} (Expected {current_n}, got {parsed['n']})")
                     
                     config_key = (filename, ants, iters)
                     aggregated_data[current_n][config_key].append(parsed['time'])
-                    
                     current_paths[filename] = parsed.get('path_str', "")
                     
                 except Exception as e:
@@ -125,9 +128,8 @@ def main():
     for (ants, iters) in TEST_CONFIGS:
         for f in SOURCE_FILES:
             fname = f['src']
-            header_str = f"{fname} (A={ants}, I={iters})"
-            headers.append(header_str)
-            column_keys.append((fname, ants, iters)) 
+            headers.append(f"{fname} (A={ants}, I={iters})")
+            column_keys.append((fname, ants, iters))
     
     with open(OUTPUT_CSV, 'w', newline='') as csvfile:
         writer = csv.writer(csvfile)
@@ -142,7 +144,7 @@ def main():
                     avg_time = sum(times) / len(times)
                     row.append(f"{avg_time:.6f}")
                 else:
-                    row.append("N/A")
+                    row.append("0.000000")
             writer.writerow(row)
             
     print(f"Successfully saved results to {OUTPUT_CSV}")
