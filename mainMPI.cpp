@@ -493,7 +493,7 @@ int main(int argc, char** argv) {
 
             // LOgging only at master node
             if (rank == 0) {
-                cout << iter << ", " << std::flush;
+                // cout << iter << ", " << std::flush;
 
                 // This solution-tracking logic also only runs on the master
                 solutions.push_back(vector<Position>());
@@ -536,7 +536,7 @@ int main(int argc, char** argv) {
             }
 
             cout << "\nSolutionCost : " << solutionCost << endl;
-            cout<< "\nExecution time: "<<end-start<<endl;
+            cout<< "\nTime taken: "<<end-start<<endl;
         }
 
     MPI_Finalize();
