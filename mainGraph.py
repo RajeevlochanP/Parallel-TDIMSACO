@@ -9,7 +9,7 @@ SOURCE_FILES = [
         'compiler': 'g++',
         'src': 'main.cpp', 
         'out': './main', 
-        'flags': ['-std=c++17']
+        'flags': ['-std=c++17'],
         'run_cmd' :[]
     },
     {
@@ -18,6 +18,26 @@ SOURCE_FILES = [
         'out': './mainMPI', 
         'flags': [],
         'run_cmd': ['mpirun', '-np', '4']
+    },{
+        'compiler': 'mpic++',
+        'src': 'MPI_OpenMP.cpp', 
+        'out': './mainOpenMP', 
+        'flags': ['-fopenmp'],
+        'run_cmd': ['mpirun', '-np', '4']
+    },
+    {
+        'compiler': 'g++',
+        'src': 'mainOpenMPTest.cpp', 
+        'out': './mainOpenMPTest', 
+        'flags': ['-std=c++17', '-fopenmp'],
+        'run_cmd': []
+    },
+    {
+        'compiler': 'g++',
+        'src': 'mainOpenMP.cpp', 
+        'out': './mainOpenMP', 
+        'flags': ['-std=c++17', '-fopenmp'],
+        'run_cmd': []
     }
 ]
 
@@ -30,7 +50,7 @@ TEST_CONFIGS = [
 
 GRID_FILE_PATH = "./gridGenration/grids.txt"
 GRID_RANGE = range(0, 70)
-OUTPUT_CSV = "groupByN_MPI.csv"
+OUTPUT_CSV = "groupByN_Final_MPI.csv"
 
 def compile_code():
     print("Compiling..!")
@@ -78,7 +98,8 @@ def main():
                 filename = file_info['src']
                 
                 try:
-                    cmd = [exe, GRID_FILE_PATH, str(grid_id), str(ants), str(iters)]
+                    run_prefix = file_info.get('run_cmd', [])
+                    cmd = run_prefix + [exe, GRID_FILE_PATH, str(grid_id), str(ants), str(iters)]
                     
                     result = subprocess.run(cmd, capture_output=True, text=True)
                     

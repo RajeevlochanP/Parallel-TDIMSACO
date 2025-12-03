@@ -367,7 +367,7 @@ int main(int argc, char** argv) {
     vector<Position> solution;
     double solutionCost = 0.0;
     vector<vector<Position>> solutions;
-    int noOfAnts = 10, noOfIterations = 20, stepSize = 3;
+    int noOfAnts = atoi(argv[3]), noOfIterations = atoi(argv[4]), stepSize = 3;
     double alpha = 1.5, beta = 0.8;
     vector<double> solutionsCost(noOfIterations);
     // vector<unique_ptr<AntT>> ants;
@@ -402,7 +402,7 @@ int main(int argc, char** argv) {
     for (int iter = 0; iter < noOfIterations; ++iter) {
         // Each process running its own ants --> main parallelism done here
 
-            #pragma omp parallel for
+            #pragma omp parallel for num_threads(4)
             for (int j = 0; j < local_noOfAnts; ++j) {
                 local_ants[j]->findSolution();
             }
@@ -457,7 +457,7 @@ int main(int argc, char** argv) {
             }
 
         // All processes do this on their local ants
-            #pragma omp parallel for
+            #pragma omp parallel for num_threads(4)
             for (int j = 0; j < local_noOfAnts; ++j) {
                 local_ants[j]->restartPath();
             }
