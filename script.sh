@@ -9,4 +9,3 @@ echo "Running Tests:"
 ./mainOpenMPTest ./gridGenration/grids.txt 500 10 20 | grep "Time taken"
 mpirun -np 10 ./mainMPI ./gridGenration/grids.txt 500 10 20 | grep "Time taken"
 mpirun -np 10 ./MPI_OpenMP ./gridGenration/grids.txt 500 10 20 | grep "Time taken"
-# python3 gridGeneration.py input.csv grids.txt --mode random_walk

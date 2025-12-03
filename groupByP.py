@@ -35,12 +35,12 @@ OUTPUT_CSV = "groupByPMPI.csv"
 def compile_code():
     for file_info in SOURCE_FILES:
         cmd = [file_info['compiler']] + file_info['flags'] + [file_info['src'], "-o", file_info['out']]
-        print(f"Compiling {file_info['src']}...")
+        print(f"Compiling {file_info['src']}")
         result = subprocess.run(cmd, capture_output=True, text=True)
         if result.returncode != 0:
             print(f"Error compiling {file_info['src']}:\n{result.stderr}")
             sys.exit(1)
-    print("Compilation successful.\n")
+    print("Compilation successful\n")
 
 def parse_output(output_str):
     data = {}
@@ -70,7 +70,7 @@ def main():
     aggregated_data = defaultdict(lambda: defaultdict(list))
     
     step_size = 1.0 / NUM_P_GROUPS
-    print(f"--- Running for Grids {GRID_RANGE.start} to {GRID_RANGE.stop - 1} ---")
+    print(f"Running for grids {GRID_RANGE.start} to {GRID_RANGE.stop - 1}")
     
     for grid_id in GRID_RANGE:
         
@@ -100,9 +100,9 @@ def main():
                     print(f"Error running {filename} on Grid {grid_id}: {e}")
 
         if grid_id % 10 == 0:
-            print(f"Processed up to Grid {grid_id}...")
+            print(f"Processed up to grid {grid_id}")
 
-    print("\n--- Processing Data & Writing CSV ---")
+    print("\nProcessing data & writing CSV")
     sorted_bins = sorted(aggregated_data.keys(), key=lambda x: x[0])
     headers = ["P_Range_Start", "P_Range_End", "Range_Label"]
     column_keys = []

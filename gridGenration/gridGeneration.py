@@ -1,25 +1,3 @@
-#!/usr/bin/env python3
-"""
-generate_grids_from_csv.py
-
-Usage:
-    python generate_grids_from_csv.py input.csv grids.txt [--mode monotonic|random_walk] [--seed BASE_SEED]
-
-CSV format: no header, each row: n,p  (example: 10,0.35)
-Outputs grids.txt containing multiple grids in parseable format.
-
-Grid file format (per-grid):
-GRID <index> n=<n> p=<p> seed=<seed>
-<row0: space-separated 0/1>
-...
-<rowN-1>
-
-Example:
-GRID 0 n=5 p=0.35 seed=123456789
-0 1 0 0 1
-0 0 0 1 0
-...
-"""
 import sys
 import csv
 import random
@@ -94,7 +72,7 @@ def main():
     parser.add_argument("input_csv")
     parser.add_argument("output_grids", help="output grids text file (e.g. grids.txt)")
     parser.add_argument("--mode", choices=["monotonic", "random_walk"], default="monotonic")
-    parser.add_argument("--seed", type=int, default=None, help="optional base seed (64-bit int). If omitted a high-quality seed is chosen.")
+    parser.add_argument("--seed", type=int, default=None, help="If not given one, the program will automatically pick a  random seed on its own")
     args = parser.parse_args()
 
     if args.seed is None:
@@ -107,17 +85,13 @@ def main():
         rows = [row for row in reader if row and len(row) >= 2]
 
     if not rows:
-        print("No rows found in input CSV.")
+        print("No rows found in input CSV")
         return
 
     with open(args.output_grids, "w") as outf:
         for idx, row in enumerate(rows):
-            try:
-                n = int(row[0])
-                p = float(row[1])
-            except Exception as e:
-                print(f"Skipping row {idx} ({row}): parse error {e}")
-                continue
+            n = int(row[0])
+            p = float(row[1])
             per_seed = (seed_base + idx) & ((1<<63)-1)
             grid = generate_grid(n, p, seed=per_seed, mode=args.mode)
             outf.write(f"GRID {idx} n={n} p={p} seed={per_seed}\n")

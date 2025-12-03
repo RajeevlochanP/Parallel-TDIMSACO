@@ -1,5 +1,3 @@
-#!/bin/bash
-
 SRC="main.cpp"
 EXE="main"
 GRID_FILE="./gridGenration/grids.txt"
@@ -7,16 +5,16 @@ CSV_FILE="./outputs/results.csv"
 
 mkdir -p "$(dirname "$CSV_FILE")"
 
-echo "Compiling $SRC..."
+echo "Compiling $SRC"
 g++ -std=c++17 "$SRC" -o "$EXE"
 if [ $? -ne 0 ]; then
-    echo "Compilation failed!"
+    echo "Compilation failed"
     exit 1
 fi
 
 echo "index,n,p,solutionCost,timeTaken(s)" > "$CSV_FILE"
 
-echo "Running $EXE for indexes 0 to 94..."
+echo "Running $EXE for indexes 0 to 94"
 for i in $(seq 0 94); do
     start=$(date +%s%N)
 
@@ -40,4 +38,4 @@ for i in $(seq 0 94); do
     echo "Run #$i → n=$N_VAL p=$P_VAL cost=$COST_VAL time=${TIME_TAKEN}s"
 done
 
-echo "All runs complete. CSV saved to: $CSV_FILE"
+echo "Completed, CSV saved to $CSV_FILE"

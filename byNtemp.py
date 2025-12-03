@@ -36,12 +36,12 @@ def compile_code():
     print("Compiling Sources ")
     for file_info in SOURCE_FILES:
         cmd = [file_info['compiler']] + file_info['flags'] + [file_info['src'], "-o", file_info['out']]
-        print(f"Compiling {file_info['src']}...")
+        print(f"Compiling {file_info['src']}")
         result = subprocess.run(cmd, capture_output=True, text=True)
         if result.returncode != 0:
             print(f"Error compiling {file_info['src']}:\n{result.stderr}")
             sys.exit(1)
-    print("Compilation done.\n")
+    print("Compilation done\n")
 
 def parse_output(output_str):
     data = {}
@@ -66,7 +66,7 @@ def main():
     
     aggregated_data = defaultdict(lambda: defaultdict(list))
     
-    print(f"Running Experiments for Grids {GRID_RANGE.start} to {GRID_RANGE.stop - 1} ")
+    print(f"Running experiments for grids {GRID_RANGE.start} to {GRID_RANGE.stop - 1} ")
 
     for grid_id in GRID_RANGE:
         current_n = None
@@ -95,7 +95,7 @@ def main():
                     if current_n is None:
                         current_n = parsed['n']
                     elif current_n != parsed['n']:
-                        print(f"Mismatch in grid size for Grid {grid_id} (Expected {current_n}, got {parsed['n']})")
+                        print(f"Mismatch in grid size for grid {grid_id} (Expected {current_n}, got {parsed['n']})")
                     
                     config_key = (filename, ants, iters)
                     aggregated_data[current_n][config_key].append(parsed['time'])
@@ -113,10 +113,10 @@ def main():
                     other_path = current_paths.get(fname)
                     
                     if ref_path and other_path and ref_path != other_path:
-                        print(f"Warning: Path mismatch on Grid {grid_id} [Ants={ants}, Iter={iters}] between {reference_file} and {fname}")
+                        print(f"Path mismatch on grid {grid_id} [Ants={ants}, Iter={iters}] between {reference_file} and {fname}")
 
         if grid_id % 10 == 0:
-            print(f"Processed up to Grid {grid_id}...")
+            print(f"Processed up to grid {grid_id}")
 
     print("\n Processing Data & Writing CSV")
     

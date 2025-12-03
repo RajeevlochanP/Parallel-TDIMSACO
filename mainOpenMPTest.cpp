@@ -163,7 +163,6 @@ public:
         int col = currPosition.col;
         Position target(grid->size - 1, grid->size - 1);
         vector<Position> allowed;
-        // #pragma omp parallel for num_threads(18) collapse(2) reduction(merge: allowed)
         for (int i = row - stepSize; i <= row + stepSize; ++i) {
             for (int j = col - stepSize; j <= col + stepSize; ++j) {
                 if (i == row && j == col) continue;
@@ -281,7 +280,7 @@ vector<vector<char>> readGridFromFile(const string& filePath, int gridIndex) {
                         grid[i].push_back(cell);
                 }
 
-                // done reading desired grid
+
                 cout << "Read GRID " << gridIndex
                      << " successfully: n=" << n
                      << " p=" << p
@@ -302,14 +301,13 @@ int main(int argc, char** argv) {
         cout << "Usage: " << argv[0] << " <path to grids.txt> <grid_index>\n" << std::flush;
         return 1;
     }
-    // taking required inputs
+
     char* filePath = argv[1];
     int gridIndex = atoi(argv[2]);
     double start_time, end_time;
-    // getting grid from file
+
     vector<vector<char>> test=readGridFromFile(filePath,gridIndex);
 
-    //main algorithm starts here
     start_time = omp_get_wtime();
 
     GraphT grid((int)test.size(),test);
@@ -325,7 +323,6 @@ int main(int argc, char** argv) {
 
     unsigned int baseSeed = 69;
 
-    //ants creation and pushing into vectors i think with reduction i can do this in O(log(ants count))
     for (int i = 0; i < noOfAnts; ++i) {
         ants.emplace_back(make_unique<AntT>(&grid, stepSize, alpha, beta, baseSeed+i));
     }
@@ -340,6 +337,7 @@ int main(int argc, char** argv) {
         for (int j = 0; j < noOfAnts; ++j) {
             grid.updateTdiValues(ants[j]->path);
         }
+        #pragma omp parallel for
         for (int j = 0; j < noOfAnts; ++j) {
             ants[j]->restartPath();
         }
@@ -371,16 +369,16 @@ int main(int argc, char** argv) {
 
     end_time = omp_get_wtime();
     double sec = end_time - start_time;
-    cout << "Time taken: " << sec << " seconds" << endl;
+    cout << "Time taken " << sec << " seconds" << endl;
     //end of main algorithm
     //printing the solution Ali dont remove
-    cout << "Solution : " << solution[0]<< std::flush;
+    cout << "Solution " << solution[0]<< std::flush;
     for (size_t j = 1; j < solution.size(); ++j) {
         cout << "," << solution[j]<< std::flush;
         solutionCost += GraphT::distance(solution[j-1], solution[j]);
     }
 
-    cout << "\nSolutionCost : " << solutionCost << endl;
+    cout << "\nSolutionCost " << solutionCost << endl;
 
     return 0;
 }

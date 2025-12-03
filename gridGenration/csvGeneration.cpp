@@ -7,7 +7,7 @@
 int main() {
     std::ofstream file("input.csv");
     if (!file.is_open()) {
-        std::cerr << "Error: Could not open file for writing.\n";
+        std::cerr << "Error- Could not open file for writing.\n";
         return 1;
     }
 
@@ -22,6 +22,6 @@ int main() {
     }
 
     file.close();
-    std::cout << "Data written successfully to input.csv\n";
+    std::cout << "Data written to input.csv\n";
     return 0;
 }

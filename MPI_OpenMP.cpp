@@ -305,24 +305,21 @@ int main(int argc, char** argv) {
 
     if (argc < 3) {
         if (rank == 0) {
-            // print error only from one master core
             cout << "Usage: " << argv[0] << " <path to grids.txt> <grid_index>\n" << std::flush;
         }
         MPI_Finalize();
         return 1;
     }
-    // taking required inputs
+
     char* filePath = argv[1];
     int gridIndex = atoi(argv[2]);
-    // getting grid from file
     vector<vector<char>> test;
     int n=0;
     
-    // Only master process reads file and sends to all other workers
     if(rank==0) {
         test = readGridFromFile(filePath, gridIndex);
         if (test.empty()) {
-            n = -1; // Set index to -1 if no grid found
+            n = -1; 
         } else {
             n = (int)test.size();
         }
@@ -336,12 +333,11 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    // If worker node ? then allocate the space to receive data 
     if (rank != 0) {
         test.resize(n, vector<char>(n));
     }
 
-    // Flattening the grid and broadcast for efficiency 
+    //2D to 1D conversion
     vector<char> flat_grid(n * n);
     if (rank == 0) {
         for (int i = 0; i < n; ++i) {
@@ -351,7 +347,6 @@ int main(int argc, char** argv) {
         }
     }
 
-    // Broadcast the flattened grid data from Master Node to all
     MPI_Bcast(flat_grid.data(), n * n, MPI_CHAR, 0, MPI_COMM_WORLD);
 
     // All other nodes wiill have to reconstruct the grid from the flat vector
@@ -400,7 +395,7 @@ int main(int argc, char** argv) {
     double start=MPI_Wtime();
 
     for (int iter = 0; iter < noOfIterations; ++iter) {
-        // Each process running its own ants --> main parallelism done here
+        // Each process running its own ants (main step of paralelization)
 
             #pragma omp parallel for num_threads(4)
             for (int j = 0; j < local_noOfAnts; ++j) {
@@ -408,7 +403,6 @@ int main(int argc, char** argv) {
             }
 
         //Path length will vary across iterations so serializing this 
-        // tentative format [path1_len, p1.row, p1.col, ..., path2_len, p2.row, p2.col, ...]
         
             vector<int> local_paths_data;
             for (int j = 0; j < local_noOfAnts; ++j) {
@@ -430,7 +424,7 @@ int main(int argc, char** argv) {
                     grid.updateTdiValues(local_ants[j]->path);
                 }
 
-                //  receive from all other nodes and update grid 
+              
                 for (int worker_rank = 1; worker_rank < world_size; ++worker_rank) {
                     int received_size;
                     MPI_Recv(&received_size, 1, MPI_INT, worker_rank, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
@@ -438,7 +432,6 @@ int main(int argc, char** argv) {
                     vector<int> worker_path_data(received_size);
                     MPI_Recv(worker_path_data.data(), received_size, MPI_INT, worker_rank, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
-                    // Deserialize and update grid
                     int idx = 0;
                     while (idx < received_size) {
                         int path_len = worker_path_data[idx++];
@@ -456,16 +449,15 @@ int main(int argc, char** argv) {
                 }
             }
 
-        // All processes do this on their local ants
+        // Each procccess does it for its own ants
             #pragma omp parallel for num_threads(4)
             for (int j = 0; j < local_noOfAnts; ++j) {
                 local_ants[j]->restartPath();
             }
 
-        // braodcast the updated grid so that other process can access the correct values in next iters
             int grid_n = grid.size;
             
-            // Flatten and Broadcast tdiValues (vector<vector<double>>)
+            // Broadcast tdiValues
             vector<double> flat_tdi(grid_n * grid_n);
             if (rank == 0) {
                 for (int i = 0; i < grid_n; ++i)
@@ -473,14 +465,12 @@ int main(int argc, char** argv) {
                         flat_tdi[i * grid_n + j] = grid.tdiValues[i][j];
             }
             MPI_Bcast(flat_tdi.data(), grid_n * grid_n, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-            // All processes un-flatten
+            // Convert back to 2D from 1D
             for (int i = 0; i < grid_n; ++i)
                 for (int j = 0; j < grid_n; ++j)
                     grid.tdiValues[i][j] = flat_tdi[i * grid_n + j];
 
 
-        // Flatten and Broadcast index_data (vector<vector<Position>>)
-        // A Position is 2 ints (row, col)
             vector<int> flat_index(grid_n * grid_n * 2);
             if (rank == 0) {
                 for (int i = 0; i < grid_n; ++i) {
@@ -491,7 +481,7 @@ int main(int argc, char** argv) {
                 }
             }
             MPI_Bcast(flat_index.data(), grid_n * grid_n * 2, MPI_INT, 0, MPI_COMM_WORLD);
-            // All processes un-flatten
+          
             for (int i = 0; i < grid_n; ++i) {
                 for (int j = 0; j < grid_n; ++j) {
                     grid.index_data[i][j].row = flat_index[(i * grid_n + j) * 2 + 0];
@@ -503,7 +493,7 @@ int main(int argc, char** argv) {
             if (rank == 0) {
                 // cout << iter << ", " << std::flush;
 
-                // This solution-tracking logic also only runs on the master
+             
                 solutions.push_back(vector<Position>());
                 solutions.back().push_back(Position(0, 0));
                 while (!(solutions.back().back() == goalPosition)) {

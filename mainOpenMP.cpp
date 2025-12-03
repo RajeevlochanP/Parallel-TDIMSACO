@@ -244,7 +244,7 @@ vector<vector<char>> readGridFromFile(const string& filePath, int gridIndex) {
     vector<vector<char>> grid;
     ifstream inputFile(filePath);
     if (!inputFile.is_open()) {
-        cerr << "Error: Could not open file at path: " << filePath << endl;
+        cerr << "Could not open file at path: " << filePath << endl;
         return grid;
     }
 
@@ -274,7 +274,7 @@ vector<vector<char>> readGridFromFile(const string& filePath, int gridIndex) {
 
                 for (int i = 0; i < n; ++i) {
                     if (!getline(inputFile, line)) {
-                        cerr << "Error: Unexpected EOF while reading GRID " << gridIndex << endl;
+                        cerr << "Unexpected EOF while reading grid " << gridIndex << endl;
                         return {};
                     }
                     stringstream row(line);
@@ -285,7 +285,7 @@ vector<vector<char>> readGridFromFile(const string& filePath, int gridIndex) {
 
                 // done reading desired grid
                 cout << "Read GRID " << gridIndex
-                     << " successfully: n=" << n
+                     << " successfully n=" << n
                      << " p=" << p
                      << " seed=" << seed << endl;
                 break;
@@ -301,14 +301,14 @@ vector<vector<char>> readGridFromFile(const string& filePath, int gridIndex) {
 
 int main(int argc, char** argv) {
     if (argc < 3) {
-        cout << "Usage: " << argv[0] << " <path to grids.txt> <grid_index>\n" << std::flush;
+        cout << "Usage " << argv[0] << " <path to grids.txt> <grid_index>\n" << std::flush;
         return 1;
     }
-    // taking required inputs
+
     char* filePath = argv[1];
     int gridIndex = atoi(argv[2]);
     double start_time, end_time;
-    // getting grid from file
+    
     vector<vector<char>> test=readGridFromFile(filePath,gridIndex);
 
     //main algorithm starts here
@@ -342,6 +342,7 @@ int main(int argc, char** argv) {
         for (int j = 0; j < noOfAnts; ++j) {
             grid.updateTdiValues(ants[j]->path);
         }
+        #pragma omp parallel for
         for (int j = 0; j < noOfAnts; ++j) {
             ants[j]->restartPath();
         }
@@ -372,16 +373,16 @@ int main(int argc, char** argv) {
     }
     end_time = omp_get_wtime();
     double sec = end_time - start_time;
-    cout << "Time taken: " << sec << " seconds" << endl;
+    cout << "Time taken " << sec << " seconds" << endl;
     //end of main algorithm
     //printing the solution do not remove it
-    cout << "Solution : " << solution[0]<< std::flush;
+    cout << "Solution " << solution[0]<< std::flush;
     for (size_t j = 1; j < solution.size(); ++j) {
         cout << "," << solution[j]<< std::flush;
         solutionCost += GraphT::distance(solution[j-1], solution[j]);
     }
 
-    cout << "\nSolutionCost : " << solutionCost << endl;
+    cout << "\nSolutionCost " << solutionCost << endl;
 
     return 0;
 }

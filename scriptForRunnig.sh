@@ -1,14 +1,12 @@
-#!/bin/bash
-
 SRC="main.cpp"
 EXE="main"
 GRID_FILE="./gridGenration/grids.txt"
 NUM_RUNS=3
 
-echo "Compiling $SRC with -pg for gprof..."
+echo "Compiling $SRC with -pg for gprof"
 g++ -pg -std=c++17 "$SRC" -o "$EXE"
 if [ $? -ne 0 ]; then
-    echo "Compilation failed!"
+    echo "Compilation failed"
     exit 1
 fi
 
@@ -24,4 +22,4 @@ for i in $(seq 1 $NUM_RUNS); do
     rm gmon.out
 done
 
-echo "All runs complete. Profiling results: file1.txt, file2.txt, file3.txt"s
+echo "COmpleted, Profiling results: file1.txt, file2.txt, file3.txt"s
